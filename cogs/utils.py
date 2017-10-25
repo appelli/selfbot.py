@@ -903,6 +903,120 @@ class Utility:
         async with ctx.session.post("https://hastebin.com/documents", data=code) as resp:
             data = await resp.json()
         await ctx.message.edit(content=f"Hastebin-inified! <https://hastebin.com/{data['key']}.py>")
+	 @commands.command(pass_context=True)
+    async def quotecolor(self, ctx, *, msg):
+        '''Set color (hex) of a quote embed.\n`[p]quotecolor 000000` to set the quote color to black.\n`[p]quotecolor auto` to set it to the color of the highest role the quoted person has.'''
+        if msg:
+            if msg == "auto":
+                await ctx.send(self.bot.bot_prefix + 'Successfully set color for quote embeds.')
+            else:
+                try:
+                    msg = msg.lstrip('#')
+                    int(msg, 16)
+                    await ctx.send(self.bot.bot_prefix + 'Successfully set color for quote embeds.')
+                except:
+                    await ctx.send(self.bot.bot_prefix + 'Invalid color.')
+        else:
+            await ctx.send(self.bot.bot_prefix + 'Use this command to set color to quote embeds. Usage is `>quotecolor <hex_color_value>`')
+            return
+        with open('settings/optional_config.json', 'r+') as fp:
+            opt = json.load(fp)
+            opt['quoteembed_color'] = msg
+            fp.seek(0)
+            fp.truncate()
+            json.dump(opt, fp, indent=4)
 
+    @commands.command(aliases=['q'], pass_context=True)
+    async def quote(self, ctx, *, msg: str = ""):
+        """Quote a message. [p]help quote for more info.
+        [p]quote - quotes the last message sent in the channel.
+        [p]quote <words> - tries to search for a message in the server that contains the given words and quotes it.
+        [p]quote <message_id> - quotes the message with the given message ID. Ex: [p]quote 302355374524644290 (enable developer mode to copy message IDs)
+        [p]quote <user_mention_name_or_id> - quotes the last message sent by a specific user
+        [p]quote <words> | channel=<channel_name> - quotes the message with the given words in a specified channel
+        [p]quote <message_id> | channel=<channel_name> - quotes the message with the given message ID in a specified channel
+        [p]quote <user_mention_name_or_id> | channel=<channel_name> - quotes the last message sent by a specific user in a specified channel
+        """
+        
+        await ctx.message.delete()
+        result = None
+        channels = [ctx.channel] + [x for x in ctx.guild.channels if x != ctx.channel and type(x) == discord.channel.TextChannel]
+        
+        args = msg.split(" | ")
+        msg = args[0]
+        if len(args) > 1:
+            channel = args[1].split("channel=")[1]
+            channels = []
+            for chan in ctx.guild.channels:
+                if chan.name == channel or str(chan.id) == channel:
+                    channels.append(chan)
+                    break
+            else:
+                for guild in self.bot.guilds:
+                    for chan in guild.channels:
+                        if chan.name == channel or str(chan.id) == channel and type(chan) == discord.channel.TextChannel:
+                            channels.append(chan)
+                            break
+            if not channels:
+                return await ctx.send(self.bot.bot_prefix + "The specified channel could not be found.")
+            
+        user = get_user(ctx.message, msg)
+
+        async def get_quote(msg, channels, user):
+            for channel in channels:
+                try:
+                    if user:
+                        async for message in channel.history(limit=500):
+                            if message.author == user:
+                                return message
+                    if len(msg) > 15 and msg.isdigit():
+                        async for message in channel.history(limit=500):
+                            if str(message.id) == msg:
+                                return message
+                    else:
+                        async for message in channel.history(limit=500):
+                            if msg in message.content:
+                                return message
+                except discord.Forbidden:
+                    continue
+            return None
+            
+        if msg:
+            result = await get_quote(msg, channels, user)
+        else:
+            async for message in ctx.channel.history(limit=1):
+                result = message
+        
+        if result:
+            if type(result.author) == discord.User:
+                sender = result.author.name
+            else:
+                sender = result.author.nick if result.author.nick else result.author.name
+            if embed_perms(ctx.message) and result.content:
+                color = get_config_value("optional_config", "quoteembed_color")
+                if color == "auto":
+                    color = result.author.top_role.color
+                elif color == "":
+                    color = 0xbc0b0b
+                else:
+                    color = int('0x' + color, 16)
+                em = discord.Embed(color=color, description=result.content, timestamp=result.created_at)
+                em.set_author(name=sender, icon_url=result.author.avatar_url)
+                footer = ""
+                if result.channel != ctx.channel:
+                    footer += "#" + result.channel.name
+                    
+                if result.guild != ctx.guild:
+                    footer += " | " + result.guild.name
+                    
+                if footer:
+                    em.set_footer(text=footer)
+                await ctx.send(embed=em)
+            elif result.content:
+                await ctx.send('%s - %s```%s```' % (sender, result.created_at, result.content))
+            else:
+                await ctx.send(self.bot.bot_prefix + "Embeds cannot be quoted.")
+        else:
+            await ctx.send(self.bot.bot_prefix + 'No quote found.')
 def setup(bot):
     bot.add_cog(Utility(bot))
