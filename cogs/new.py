@@ -27,6 +27,7 @@ class New:
 		
     @commands.group(pass_context=True, invoke_without_command=True)
     async def ascii(self, ctx, *, msg):
+        """Convert text to ascii art. Ex: ascii stuff help ascii for more info."""
         if ctx.invoked_subcommand is None:
             if msg:
                 font = get_config_value("optional_config", "ascii_font")
@@ -59,6 +60,14 @@ class New:
         regional_list = [self.regionals[x.lower()] if x.isalnum() or x in ["!", "?"] else x for x in msg]
         regional_output = '\u200b'.join(regional_list)
         await ctx.send(regional_output)
+		
+    @commands.command()
+    async def embedsay(self, ctx, *, message):
+        '''Quick command to embed messages quickly.'''
+        await ctx.message.delete()
+        em = discord.Embed(color = str(ctx.message.author.top_role.color))
+        em.description = message
+        await ctx.send(embed=em)		
 		
 def setup(bot):
     bot.add_cog(New(bot))

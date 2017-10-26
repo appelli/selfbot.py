@@ -337,6 +337,7 @@ class Misc:
         emb.add_field(name='\N{BILLIARDS} Your answer:', value=random.choice(choices), inline=True)
         await ctx.send(embed=emb)
 
+		
 
 def setup(bot):
     bot.add_cog(Misc(bot))
