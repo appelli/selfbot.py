@@ -13,6 +13,15 @@ import io
 import aiohttp
 import json
 import os
+import random
+import re
+import json
+from discord.ext import commands
+import discord
+from cogs.utils.checks import embed_perms, cmd_prefix_len, find_channel
+from cogs.utils.config import get_config_value, write_config_value
+from pyfiglet import figlet_format, FontError, FontNotFound
+import urllib.parse
 
 
 class New:
@@ -35,100 +44,6 @@ class New:
                           'v': '\N{REGIONAL INDICATOR SYMBOL LETTER V}', 'w': '\N{REGIONAL INDICATOR SYMBOL LETTER W}',
                           'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
                           'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
-                          '0': '0?', '1': '1?', '2': '2?', '3': '3?',
-                          '4': '4?', '5': '5?', '6': '6?', '7': '7?', '8': '8?', '9': '9?', '!': '\u2757',
-                          '?': '\u2753'}
-        self.emoji_reg = re.compile(r'<:.+?:([0-9]{15,21})>')
-        self.ball = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes definitely', 'You may rely on it',
-                     'As I see it, yes', 'Most likely', 'Outlook good', 'Yes', 'Signs point to yes',
-                     'Reply hazy try again',
-                     'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again',
-                     'Don\'t count on it', 'My reply is no', 'My sources say no', 'Outlook not so good',
-                     'Very doubtful']
-
-    emoji_dict = {
-    # these arrays are in order of "most desirable". Put emojis that most convincingly correspond to their letter near the front of each array.
-        'a': ['??', '??', '??', '??', '4?'],
-        'b': ['??', '??', '8?'],
-        'c': ['??', '©', '??'],
-        'd': ['??', '?'],
-        'e': ['??', '3?', '??', '??'],
-        'f': ['??', '??'],
-        'g': ['??', '??', '6?', '9?', '?'],
-        'h': ['??', '?'],
-        'i': ['??', '?', '??', '1?'],
-        'j': ['??', '??'],
-        'k': ['??', '??'],
-        'l': ['??', '1?', '??', '??', '??'],
-        'm': ['??', '?', '??'],
-        'n': ['??', '?', '??'],
-        'o': ['??', '??', '0?', '?', '??', '?', '?', '?', '??', '??', '??'],
-        'p': ['??', '??'],
-        'q': ['??', '?'],
-        'r': ['??', '®'],
-        's': ['??', '??', '5?', '?', '??', '??'],
-        't': ['??', '?', '?', '??', '??', '7?'],
-        'u': ['??', '?', '??'],
-        'v': ['??', '?', '?'],
-        'w': ['??', '?', '??'],
-        'x': ['??', '?', '?', '?', '?'],
-        'y': ['??', '?', '??'],
-        'z': ['??', '2?'],
-        '0': ['0?', '??', '0?', '?', '??', '?', '?', '?', '??', '??', '??'],
-        '1': ['1?', '??'],
-        '2': ['2?', '??'],
-        '3': ['3?'],
-        '4': ['4?'],
-        '5': ['5?', '??', '??', '?'],
-        '6': ['6?'],
-        '7': ['7?'],
-        '8': ['8?', '??', '??', '??'],
-        '9': ['9?'],
-        '?': ['?'],
-        '!': ['?', '?', '?', '?'],
-
-        # emojis that contain more than one letter can also help us react
-        # letters that we are trying to replace go in front, emoji to use second
-        #
-        # if there is any overlap between characters that could be replaced,
-        # e.g. ?? vs ??, both could replace "10",
-        # the longest ones & most desirable ones should go at the top
-        # else you'll have "100" -> "??0" instead of "100" -> "??".
-        'combination': [['cool', '??'],
-                        ['back', '??'],
-                        ['soon', '??'],
-                        ['free', '??'],
-                        ['end', '??'],
-                        ['top', '??'],
-                        ['abc', '??'],
-                        ['atm', '??'],
-                        ['new', '??'],
-                        ['sos', '??'],
-                        ['100', '??'],
-                        ['loo', '??'],
-                        ['zzz', '??'],
-                        ['...', '??'],
-                        ['ng', '??'],
-                        ['id', '??'],
-                        ['vs', '??'],
-                        ['wc', '??'],
-                        ['ab', '??'],
-                        ['cl', '??'],
-                        ['ok', '??'],
-                        ['up', '??'],
-                        ['10', '??'],
-                        ['11', '?'],
-                        ['ll', '?'],
-                        ['ii', '?'],
-                        ['tm', '™'],
-                        ['on', '??'],
-                        ['oo', '??'],
-                        ['!?', '?'],
-                        ['!!', '?'],
-                        ['21', '??'],
-                        ]
-    }
-
     # used in textflip
     text_flip = {}
     char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
