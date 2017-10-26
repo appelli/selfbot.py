@@ -243,18 +243,6 @@ class Misc:
         e.description = f'Your answer is: `{result}`'
         await ctx.channel.send(embed=e)
 
-    @commands.command()
-    async def algebra(self, ctx, *, equation):
-        '''Solve algabraic equations'''
-        eq = parse_equation(equation)
-        result = solve(eq)
-        em = discord.Embed()
-        em.color = discord.Color.green()
-        em.title = 'Equation'
-        em.description = f'```py\n{equation} = 0```'
-        em.add_field(name='Result', value=f'```py\n{result}```')
-        await ctx.send(embed=em)
-
     @commands.group(invoke_without_command=True, name='emoji', aliases=['emote', 'e'])
     async def _emoji(self, ctx, *, emoji: str):
         '''Use emojis without nitro!'''
