@@ -13,11 +13,6 @@ import io
 import aiohttp
 import json
 import os
-import random
-import re
-import json
-from discord.ext import commands
-import discord
 
 
 class New:
@@ -26,13 +21,12 @@ class New:
 
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
-        """Choose randomly from the options you give. [p]choose this | that"""
+        """Choose randomly from the options you give. choose this | that"""
         await ctx.send(
                        self.bot.bot_prefix + 'I choose: ``{}``'.format(random.choice(choices.split("|"))))
 		
     @commands.group(pass_context=True, invoke_without_command=True)
     async def ascii(self, ctx, *, msg):
-        """Convert text to ascii art. Ex: [p]ascii stuff [p]help ascii for more info."""
         if ctx.invoked_subcommand is None:
             if msg:
                 font = get_config_value("optional_config", "ascii_font")
