@@ -27,7 +27,6 @@ import urllib.parse
 class New:
     def __init__(self, bot):
         self.bot = bot
-		self.emoji_converter = commands.EmojiConverter()
 
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
