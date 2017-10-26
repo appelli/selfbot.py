@@ -19,8 +19,9 @@ class New:
     def __init__(self, bot):
         self.bot = bot
 
-	@comamnds.command("changegame", "```\n{0}changegame [<game>]\n\nChanges your Playing... message to [<game>] or unsets it.```" pass_context=True, aliases=['pick'])
-	async def setgame(message, parameters, recursion=0):
+	@commands.command(pass_context=True, aliases=['pick']
+	async def cmd_changegame(message, parameters, recursion=0):
+	    """Choose randomly from the options you give. choose this | that"""
     if message.server:
         me = message.server.me
     else:
@@ -30,7 +31,7 @@ class New:
     else:
         game = discord.Game(name=parameters)
     await client.change_presence(game=game, status=me.status)
-    await reply(message, ":thumbsup:")		
+    await reply(message, ":thumbsup:")
 		
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
