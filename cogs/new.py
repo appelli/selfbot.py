@@ -61,13 +61,5 @@ class New:
         regional_output = '\u200b'.join(regional_list)
         await ctx.send(regional_output)
 		
-    @commands.command()
-    async def embedsay(self, ctx, *, message):
-        '''Quick command to embed messages quickly.'''
-        await ctx.message.delete()
-        em = discord.Embed(color = str(ctx.message.author.top_role.color))
-        em.description = message
-        await ctx.send(embed=em)		
-		
 def setup(bot):
     bot.add_cog(New(bot))
