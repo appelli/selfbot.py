@@ -98,16 +98,47 @@ class Mod:
 
         await ctx.send(embed=emb)
 
-    @commands.command(aliases=['del','p','prune'])
-    async def purge(self, ctx, limit : int):
-        '''Clean a number of messages'''
-        await ctx.purge(limit=limit+1) # TODO: add more functionality
-
-    @commands.command()
-    async def clean(self, ctx, limit : int=15):
-        '''Clean a number of your own messages'''
-        await ctx.purge(limit=limit+1, check=lambda m: m.author == ctx.author)
-
+    @commands.command(aliases=['sban'], pass_context=True)
+    async def softban(self, ctx, user, *, reason=""):
+        """Bans and unbans a user (if you have the permission)."""
+        user = get_user(ctx.message, user)
+        if user:
+            try:
+                await user.ban(reason=reason)
+                await ctx.guild.unban(user)
+                return_msg = "Banned and unbanned user `{}`".format(user.mention)
+                if reason:
+                    return_msg += " for reason `{}`".format(reason)
+                return_msg += "."
+                await ctx.message.edit(content=self.bot.bot_prefix + return_msg)
+            except discord.Forbidden:
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Could not softban user. Not enough permissions.')
+        else:
+            return await ctx.message.edit(content=self.bot.bot_prefix + 'Could not find user.')
+		
+		
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(aliases=['p'], pass_context=True, no_pm=True)
+    async def purge(self, ctx, msgs: int, *, txt=None):
+        """Purge last n msgs or n msgs with a word. [p]help purge for more info.
+        
+        Ex:
+        
+        [p]purge 20 - deletes the last 20 messages in a channel sent by anyone.
+        [p]purge 20 stuff - deletes any messages in the last 20 messages that contains the word 'stuff'."""
+        await ctx.message.delete()
+        if msgs < 10000:
+            async for message in ctx.message.channel.history(limit=msgs):
+                try:
+                    if txt:
+                        if txt.lower() in message.content.lower():
+                            await message.delete()
+                    else:
+                        await message.delete()
+                except:
+                    pass
+        else:
+            await ctx.send(self.bot.bot_prefix + 'Too many messages to delete. Enter a number < 10000')
 
     @commands.command()
     async def bans(self, ctx):
