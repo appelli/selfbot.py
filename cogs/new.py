@@ -18,7 +18,157 @@ import os
 class New:
     def __init__(self, bot):
         self.bot = bot
-        self.emoji_converter = commands.EmojiConverter()
+        self.regionals = {'a': '\N{REGIONAL INDICATOR SYMBOL LETTER A}', 'b': '\N{REGIONAL INDICATOR SYMBOL LETTER B}',
+                          'c': '\N{REGIONAL INDICATOR SYMBOL LETTER C}',
+                          'd': '\N{REGIONAL INDICATOR SYMBOL LETTER D}', 'e': '\N{REGIONAL INDICATOR SYMBOL LETTER E}',
+                          'f': '\N{REGIONAL INDICATOR SYMBOL LETTER F}',
+                          'g': '\N{REGIONAL INDICATOR SYMBOL LETTER G}', 'h': '\N{REGIONAL INDICATOR SYMBOL LETTER H}',
+                          'i': '\N{REGIONAL INDICATOR SYMBOL LETTER I}',
+                          'j': '\N{REGIONAL INDICATOR SYMBOL LETTER J}', 'k': '\N{REGIONAL INDICATOR SYMBOL LETTER K}',
+                          'l': '\N{REGIONAL INDICATOR SYMBOL LETTER L}',
+                          'm': '\N{REGIONAL INDICATOR SYMBOL LETTER M}', 'n': '\N{REGIONAL INDICATOR SYMBOL LETTER N}',
+                          'o': '\N{REGIONAL INDICATOR SYMBOL LETTER O}',
+                          'p': '\N{REGIONAL INDICATOR SYMBOL LETTER P}', 'q': '\N{REGIONAL INDICATOR SYMBOL LETTER Q}',
+                          'r': '\N{REGIONAL INDICATOR SYMBOL LETTER R}',
+                          's': '\N{REGIONAL INDICATOR SYMBOL LETTER S}', 't': '\N{REGIONAL INDICATOR SYMBOL LETTER T}',
+                          'u': '\N{REGIONAL INDICATOR SYMBOL LETTER U}',
+                          'v': '\N{REGIONAL INDICATOR SYMBOL LETTER V}', 'w': '\N{REGIONAL INDICATOR SYMBOL LETTER W}',
+                          'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
+                          'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
+                          '0': '0?', '1': '1?', '2': '2?', '3': '3?',
+                          '4': '4?', '5': '5?', '6': '6?', '7': '7?', '8': '8?', '9': '9?', '!': '\u2757',
+                          '?': '\u2753'}
+        self.emoji_reg = re.compile(r'<:.+?:([0-9]{15,21})>')
+        self.ball = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes definitely', 'You may rely on it',
+                     'As I see it, yes', 'Most likely', 'Outlook good', 'Yes', 'Signs point to yes',
+                     'Reply hazy try again',
+                     'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again',
+                     'Don\'t count on it', 'My reply is no', 'My sources say no', 'Outlook not so good',
+                     'Very doubtful']
+
+    emoji_dict = {
+    # these arrays are in order of "most desirable". Put emojis that most convincingly correspond to their letter near the front of each array.
+        'a': ['??', '??', '??', '??', '4?'],
+        'b': ['??', '??', '8?'],
+        'c': ['??', '©', '??'],
+        'd': ['??', '?'],
+        'e': ['??', '3?', '??', '??'],
+        'f': ['??', '??'],
+        'g': ['??', '??', '6?', '9?', '?'],
+        'h': ['??', '?'],
+        'i': ['??', '?', '??', '1?'],
+        'j': ['??', '??'],
+        'k': ['??', '??'],
+        'l': ['??', '1?', '??', '??', '??'],
+        'm': ['??', '?', '??'],
+        'n': ['??', '?', '??'],
+        'o': ['??', '??', '0?', '?', '??', '?', '?', '?', '??', '??', '??'],
+        'p': ['??', '??'],
+        'q': ['??', '?'],
+        'r': ['??', '®'],
+        's': ['??', '??', '5?', '?', '??', '??'],
+        't': ['??', '?', '?', '??', '??', '7?'],
+        'u': ['??', '?', '??'],
+        'v': ['??', '?', '?'],
+        'w': ['??', '?', '??'],
+        'x': ['??', '?', '?', '?', '?'],
+        'y': ['??', '?', '??'],
+        'z': ['??', '2?'],
+        '0': ['0?', '??', '0?', '?', '??', '?', '?', '?', '??', '??', '??'],
+        '1': ['1?', '??'],
+        '2': ['2?', '??'],
+        '3': ['3?'],
+        '4': ['4?'],
+        '5': ['5?', '??', '??', '?'],
+        '6': ['6?'],
+        '7': ['7?'],
+        '8': ['8?', '??', '??', '??'],
+        '9': ['9?'],
+        '?': ['?'],
+        '!': ['?', '?', '?', '?'],
+
+        # emojis that contain more than one letter can also help us react
+        # letters that we are trying to replace go in front, emoji to use second
+        #
+        # if there is any overlap between characters that could be replaced,
+        # e.g. ?? vs ??, both could replace "10",
+        # the longest ones & most desirable ones should go at the top
+        # else you'll have "100" -> "??0" instead of "100" -> "??".
+        'combination': [['cool', '??'],
+                        ['back', '??'],
+                        ['soon', '??'],
+                        ['free', '??'],
+                        ['end', '??'],
+                        ['top', '??'],
+                        ['abc', '??'],
+                        ['atm', '??'],
+                        ['new', '??'],
+                        ['sos', '??'],
+                        ['100', '??'],
+                        ['loo', '??'],
+                        ['zzz', '??'],
+                        ['...', '??'],
+                        ['ng', '??'],
+                        ['id', '??'],
+                        ['vs', '??'],
+                        ['wc', '??'],
+                        ['ab', '??'],
+                        ['cl', '??'],
+                        ['ok', '??'],
+                        ['up', '??'],
+                        ['10', '??'],
+                        ['11', '?'],
+                        ['ll', '?'],
+                        ['ii', '?'],
+                        ['tm', '™'],
+                        ['on', '??'],
+                        ['oo', '??'],
+                        ['!?', '?'],
+                        ['!!', '?'],
+                        ['21', '??'],
+                        ]
+    }
+
+    # used in textflip
+    text_flip = {}
+    char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
+    alt_char_list = "{|}z?x??n?s?bdou?l???????p?q?,?^[\]Z?XM?n-S?Q?ONW???IH???p?q?@¿<=>;:68?9?????0/?-'+*(),?%$#¡"[::-1]
+    for idx, char in enumerate(char_list):
+        text_flip[char] = alt_char_list[idx]
+        text_flip[alt_char_list[idx]] = char
+
+    # used in [p]react, checks if it's possible to react with the duper string or not
+    def has_dupe(duper):
+        collect_my_duper = list(filter(lambda x: x != '<' and x != '?',
+                                       duper))  # remove < because those are used to denote a written out emoji, and there might be more than one of those requested that are not necessarily the same one.  ? appears twice in the number unicode thing, so that must be stripped too...
+        return len(set(collect_my_duper)) != len(collect_my_duper)
+
+    # used in [p]react, replaces e.g. 'ng' with '??'
+    def replace_combos(react_me):
+        for combo in Fun.emoji_dict['combination']:
+            if combo[0] in react_me:
+                react_me = react_me.replace(combo[0], combo[1], 1)
+        return react_me
+
+    # used in [p]react, replaces e.g. 'aaaa' with '????????'
+    def replace_letters(react_me):
+        for char in "abcdefghijklmnopqrstuvwxyz0123456789!?":
+            char_count = react_me.count(char)
+            if char_count > 1:  # there's a duplicate of this letter:
+                if len(Fun.emoji_dict[
+                           char]) >= char_count:  # if we have enough different ways to say the letter to complete the emoji chain
+                    i = 0
+                    while i < char_count:  # moving goal post necessitates while loop instead of for
+                        if Fun.emoji_dict[char][i] not in react_me:
+                            react_me = react_me.replace(char, Fun.emoji_dict[char][i], 1)
+                        else:
+                            char_count += 1  # skip this one because it's already been used by another replacement (e.g. circle emoji used to replace O already, then want to replace 0)
+                        i += 1
+            else:
+                if char_count == 1:
+                    react_me = react_me.replace(char, Fun.emoji_dict[char][0])
+        return react_me
+
 
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
