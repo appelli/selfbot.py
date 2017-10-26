@@ -44,13 +44,6 @@ class New:
                           'v': '\N{REGIONAL INDICATOR SYMBOL LETTER V}', 'w': '\N{REGIONAL INDICATOR SYMBOL LETTER W}',
                           'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
                           'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
-    # used in textflip
-    text_flip = {}
-    char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
-    alt_char_list = "{|}z?x??n?s?bdou?l???????p?q?,?^[\]Z?XM?n-S?Q?ONW???IH???p?q?@¿<=>;:68?9?????0/?-'+*(),?%$#¡"[::-1]
-    for idx, char in enumerate(char_list):
-        text_flip[char] = alt_char_list[idx]
-        text_flip[alt_char_list[idx]] = char
 
     # used in [p]react, checks if it's possible to react with the duper string or not
     def has_dupe(duper):
