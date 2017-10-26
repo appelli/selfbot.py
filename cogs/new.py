@@ -19,9 +19,6 @@ class New:
     def __init__(self, bot):
         self.bot = bot
         self.emoji_converter = commands.EmojiConverter()
-
-    def __init__(self, bot):
-        self.bot = bot
         self.regionals = {'a': '\N{REGIONAL INDICATOR SYMBOL LETTER A}', 'b': '\N{REGIONAL INDICATOR SYMBOL LETTER B}',
                           'c': '\N{REGIONAL INDICATOR SYMBOL LETTER C}',
                           'd': '\N{REGIONAL INDICATOR SYMBOL LETTER D}', 'e': '\N{REGIONAL INDICATOR SYMBOL LETTER E}',
