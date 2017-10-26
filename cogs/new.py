@@ -45,33 +45,6 @@ class New:
                           'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
                           'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
 
-    # used in [p]react, replaces e.g. 'ng' with '??'
-    def replace_combos(react_me):
-        for combo in Fun.emoji_dict['combination']:
-            if combo[0] in react_me:
-                react_me = react_me.replace(combo[0], combo[1], 1)
-        return react_me
-
-    # used in [p]react, replaces e.g. 'aaaa' with '????????'
-    def replace_letters(react_me):
-        for char in "abcdefghijklmnopqrstuvwxyz0123456789!?":
-            char_count = react_me.count(char)
-            if char_count > 1:  # there's a duplicate of this letter:
-                if len(Fun.emoji_dict[
-                           char]) >= char_count:  # if we have enough different ways to say the letter to complete the emoji chain
-                    i = 0
-                    while i < char_count:  # moving goal post necessitates while loop instead of for
-                        if Fun.emoji_dict[char][i] not in react_me:
-                            react_me = react_me.replace(char, Fun.emoji_dict[char][i], 1)
-                        else:
-                            char_count += 1  # skip this one because it's already been used by another replacement (e.g. circle emoji used to replace O already, then want to replace 0)
-                        i += 1
-            else:
-                if char_count == 1:
-                    react_me = react_me.replace(char, Fun.emoji_dict[char][0])
-        return react_me
-
-
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
         """Choose randomly from the options you give. [p]choose this | that"""
