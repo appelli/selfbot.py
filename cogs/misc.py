@@ -43,12 +43,13 @@ class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.emoji_converter = commands.EmojiConverter()
-
+		
     @commands.command()
     async def embedsay(self, ctx, *, message):
         '''Quick command to embed messages quickly.'''
         await ctx.message.delete()
-        em = discord.Embedstr(ctx.message.author.top_role.color)[1:]
+        if color == 'auto':
+            color = str(ctx.message.author.top_role.color)[1:]	
         em.description = message
         await ctx.send(embed=em)
 
