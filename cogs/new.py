@@ -18,8 +18,6 @@ import re
 import json
 from discord.ext import commands
 import discord
-from cogs.utils.checks import embed_perms, cmd_prefix_len, find_channel
-from cogs.utils.config import get_config_value, write_config_value
 from pyfiglet import figlet_format, FontError, FontNotFound
 import urllib.parse
 
