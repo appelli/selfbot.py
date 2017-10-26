@@ -43,7 +43,7 @@ class New:
                           'u': '\N{REGIONAL INDICATOR SYMBOL LETTER U}',
                           'v': '\N{REGIONAL INDICATOR SYMBOL LETTER V}', 'w': '\N{REGIONAL INDICATOR SYMBOL LETTER W}',
                           'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
-                          'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
+                          'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}'
 
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
