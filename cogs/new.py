@@ -45,12 +45,6 @@ class New:
                           'x': '\N{REGIONAL INDICATOR SYMBOL LETTER X}',
                           'y': '\N{REGIONAL INDICATOR SYMBOL LETTER Y}', 'z': '\N{REGIONAL INDICATOR SYMBOL LETTER Z}',
 
-    # used in [p]react, checks if it's possible to react with the duper string or not
-    def has_dupe(duper):
-        collect_my_duper = list(filter(lambda x: x != '<' and x != '?',
-                                       duper))  # remove < because those are used to denote a written out emoji, and there might be more than one of those requested that are not necessarily the same one.  ? appears twice in the number unicode thing, so that must be stripped too...
-        return len(set(collect_my_duper)) != len(collect_my_duper)
-
     # used in [p]react, replaces e.g. 'ng' with '??'
     def replace_combos(react_me):
         for combo in Fun.emoji_dict['combination']:
