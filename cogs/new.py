@@ -18,47 +18,49 @@ import os
 class New:
     def __init__(self, bot):
         self.bot = bot
+        self.emoji_converter = commands.EmojiConverter()
 
-		# used in textflip
-    text_flip = {}
-    char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
-    alt_char_list = "{|}z?x??n?s?bdou?l???????p?q?,?^[\]Z?XM?n-S?Q?ONW???IH???p?q?@¿<=>;:68?9?????0/?-'+*(),?%$#¡"[::-1]
-    for idx, char in enumerate(char_list):
-        text_flip[char] = alt_char_list[idx]
-        text_flip[alt_char_list[idx]] = char
-
-    # used in [p]react, checks if it's possible to react with the duper string or not
-    def has_dupe(duper):
-        collect_my_duper = list(filter(lambda x: x != '<' and x != '?',
-                                       duper))  # remove < because those are used to denote a written out emoji, and there might be more than one of those requested that are not necessarily the same one.  ? appears twice in the number unicode thing, so that must be stripped too...
-        return len(set(collect_my_duper)) != len(collect_my_duper)
-
-    # used in [p]react, replaces e.g. 'ng' with '??'
-    def replace_combos(react_me):
-        for combo in Fun.emoji_dict['combination']:
-            if combo[0] in react_me:
-                react_me = react_me.replace(combo[0], combo[1], 1)
-        return react_me
-
-    # used in [p]react, replaces e.g. 'aaaa' with '????????'
-    def replace_letters(react_me):
-        for char in "abcdefghijklmnopqrstuvwxyz0123456789!?":
-            char_count = react_me.count(char)
-            if char_count > 1:  # there's a duplicate of this letter:
-                if len(Fun.emoji_dict[
-                           char]) >= char_count:  # if we have enough different ways to say the letter to complete the emoji chain
-                    i = 0
-                    while i < char_count:  # moving goal post necessitates while loop instead of for
-                        if Fun.emoji_dict[char][i] not in react_me:
-                            react_me = react_me.replace(char, Fun.emoji_dict[char][i], 1)
-                        else:
-                            char_count += 1  # skip this one because it's already been used by another replacement (e.g. circle emoji used to replace O already, then want to replace 0)
-                        i += 1
+    @commands.command(pass_context=True, aliases=['pick'])
+    async def choose(self, ctx, *, choices: str):
+        """Choose randomly from the options you give. [p]choose this | that"""
+        await ctx.send(
+                       self.bot.bot_prefix + 'I choose: ``{}``'.format(random.choice(choices.split("|"))))
+		
+    @commands.group(pass_context=True, invoke_without_command=True)
+    async def ascii(self, ctx, *, msg):
+        """Convert text to ascii art. Ex: [p]ascii stuff [p]help ascii for more info."""
+        if ctx.invoked_subcommand is None:
+            if msg:
+                font = get_config_value("optional_config", "ascii_font")
+                msg = str(figlet_format(msg.strip(), font=font))
+                if len(msg) > 2000:
+                    await ctx.send(self.bot.bot_prefix + 'Message too long, RIP.')
+                else:
+                    await ctx.message.delete()
+                    await ctx.send(self.bot.bot_prefix + '```\n{}\n```'.format(msg))
             else:
-                if char_count == 1:
-                    react_me = react_me.replace(char, Fun.emoji_dict[char][0])
-        return react_me
+                await ctx.send(
+                               self.bot.bot_prefix + 'Please input text to convert to ascii art. Ex: ``>ascii stuff``')
 
- 	
+    @commands.command(pass_context=True)
+    async def textflip(self, ctx, *, msg):
+        """Flip given text."""
+        result = ""
+        for char in msg:
+            if char in self.text_flip:
+                result += self.text_flip[char]
+            else:
+                result += char
+        await ctx.message.edit(content=result[::-1])  # slice reverses the string
+
+    @commands.command(pass_context=True)
+    async def regional(self, ctx, *, msg):
+        """Replace letters with regional indicator emojis"""
+        await ctx.message.delete()
+        msg = list(msg)
+        regional_list = [self.regionals[x.lower()] if x.isalnum() or x in ["!", "?"] else x for x in msg]
+        regional_output = '\u200b'.join(regional_list)
+        await ctx.send(regional_output)
+		
 def setup(bot):
     bot.add_cog(New(bot))
