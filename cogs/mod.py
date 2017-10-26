@@ -140,6 +140,98 @@ class Mod:
         else:
             await ctx.send(self.bot.bot_prefix + 'Too many messages to delete. Enter a number < 10000')
 
+    @commands.group(pass_context=True, no_pm=True)
+    async def mute(self, ctx, *, user: str):
+        """Chat mutes a user (if you have the permission)."""
+        if ctx.invoked_subcommand is None:
+            user = get_user(ctx.message, user)
+            if user and user != self.bot.user:
+                failed = []
+                channel_length = 0
+                for channel in ctx.message.guild.channels:
+                    if type(channel) != discord.channel.TextChannel:
+                        continue
+                    overwrites = channel.overwrites_for(user)
+                    overwrites.send_messages = False
+                    channel_length += 1
+                    try:
+                        await channel.set_permissions(user, overwrite=overwrites)
+                    except discord.Forbidden:
+                        failed.append(channel)
+                if failed and len(failed) < channel_length:
+                    await ctx.message.edit(content=self.bot.bot_prefix + "Muted user in {}/{} channels: {}".format(channel_length - len(failed), channel_length, user.mention))
+                elif failed:
+                    await ctx.message.edit(content=self.bot.bot_prefix + "Failed to mute user. Not enough permissions.")
+                else:
+                    await ctx.message.edit(content=self.bot.bot_prefix + 'Muted user: %s' % user.mention)
+            else:
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Could not find user.')
+
+    @mute.command(pass_context=True, no_pm=True)
+    async def channel(self, ctx, *, user: str):
+        user = get_user(ctx.message, user)
+        if user:
+            overwrites = ctx.message.channel.overwrites_for(user)
+            overwrites.send_messages = False
+            try:
+                ctx.message.channel.set_permissions(user, overwrite=overwrites)
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Muted user in this channel: %s' % user.mention)
+            except discord.Forbidden:
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Unable to mute user. Not enough permissions.')
+        else:
+            await ctx.message.edit(content=self.bot.bot_prefix + 'Could not find user.')
+
+    @commands.group(pass_context=True, no_pm=True)
+    async def unmute(self, ctx, *, user: str):
+        """Unmutes a user (if you have the permission)."""
+        if ctx.invoked_subcommand is None:
+            user = get_user(ctx.message, user)
+            if user:
+                failed = []
+                channel_length = 0
+                for channel in ctx.message.guild.channels:
+                    if type(channel) != discord.channel.TextChannel:
+                        continue
+                    overwrites = channel.overwrites_for(user)
+                    overwrites.send_messages = None
+                    channel_length += 1
+                    is_empty = self.are_overwrites_empty(overwrites)
+                    try:
+                        if not is_empty:
+                            await channel.set_permissions(user, overwrite=overwrites)
+                        else:
+                            await channel.set_permissions(user, overwrite=None)
+                        await channel.set_permissions(user, overwrite=overwrites)
+                    except discord.Forbidden:
+                        failed.append(channel)
+                if failed and len(failed) < channel_length:
+                    await ctx.message.edit(content=self.bot.bot_prefix + "Unmuted user in {}/{} channels: {}".format(channel_length - len(failed), channel_length, user.mention))
+                elif failed:
+                    await ctx.message.edit(content=self.bot.bot_prefix + "Failed to unmute user. Not enough permissions.")
+                else:
+                    await ctx.message.edit(content=self.bot.bot_prefix + 'Unmuted user: %s' % user.mention)
+            else:
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Could not find user.')
+
+    @unmute.command(pass_context=True, no_pm=True)
+    async def channel(self, ctx, *, user: str):
+        user = get_user(ctx.message, user)
+        if user:
+            overwrites = ctx.message.channel.overwrites_for(user)
+            is_empty = self.are_overwrites_empty(overwrites)
+            try:
+                if not is_empty:
+                    ctx.message.channel.set_permissions(user, overwrite=overwrites)
+                else:
+                    await channel.set_permissions(user, overwrite=None)
+                await channel.set_permissions(user, overwrite=overwrites)
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Unmuted user in this channel: %s' % user.mention)
+            except discord.Forbidden:
+                await ctx.message.edit(content=self.bot.bot_prefix + 'Unable to unmute user. Not enough permissions.')
+        else:
+            await ctx.message.edit(content=self.bot.bot_prefix + 'Could not find user.')
+			
+			
     @commands.command()
     async def bans(self, ctx):
         '''See a list of banned users in the guild'''

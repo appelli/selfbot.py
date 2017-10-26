@@ -132,41 +132,12 @@ class Misc:
             else:
                 c_pos += step
         return outputty
-
-    @commands.command()
-    async def bf(self, ctx, slurp:str):
-        '''Evaluate 'brainfuck' code (a retarded language).'''
-        thruput = ctx.message.content
-        preinput = thruput[5:]
-        preinput2 = "\"\"\"\n" + preinput
-        input = preinput2 + "\n\"\"\""
-        code = read(input)
-        output = bfeval(code)
-        await ctx.send("Input:\n`{}`\nOutput:\n`{}`".format(preinput, output))
-
+		
     @commands.command()
     async def py(self, ctx, *, code):
         '''Quick command to edit into a codeblock.'''
         await ctx.message.edit(content=f'```py\n{code}\n```')
-
-    @commands.group(invoke_without_command=True, aliases=['anim'])
-    async def animate(self, ctx, *, file):
-        '''Animate a text file on discord!'''
-        try:
-            with open(f'data/anims/{file}.txt') as a:
-                anim = a.read().splitlines()
-        except:
-            return await ctx.send('File not found.')
-        interval = anim[0]
-        for line in anim[1:]:
-            await ctx.message.edit(content=line)
-            await asyncio.sleep(float(interval))
-
-    @animate.command()
-    async def list(self, ctx):
-        '''Lists all possible animations'''
-        await ctx.send(f"Available animations: `{', '.join([f[:-4] for f in os.listdir('data/anims') if f.endswith('.txt')])}`")
-
+			
     @commands.command()
     async def virus(self, ctx, virus=None, *, user: discord.Member = None):
         '''
@@ -204,7 +175,7 @@ class Misc:
                     pass
 
     @commands.command(aliases=['color', 'colour', 'sc'])
-    async def show_color(self, ctx, *, color: discord.Colour):
+    async def showcolor(self, ctx, *, color: discord.Colour):
         '''Enter a color and you will see it!'''
         file = io.BytesIO()
         Image.new('RGB', (200, 90), color.to_rgb()).save(file, format='PNG')
@@ -213,72 +184,12 @@ class Misc:
         em.set_image(url='attachment://color.png')
         await ctx.send(file=discord.File(file, 'color.png'), embed=em)
 
-    @commands.command(aliases=['dc', 'dominant_color'])
-    async def dcolor(self, ctx, *, url):
-        '''Fun command that shows the dominant color of an image'''
-        await ctx.message.delete()
-        color = await ctx.get_dominant_color(url)
-        string_col = ColorNames.color_name(str(color))
-        info = f'`{str(color)}`\n`{color.to_rgb()}`\n`{str(string_col)}`'
-        em = discord.Embed(color=color, title='Dominant Color', description=info)
-        em.set_thumbnail(url=url)
-        file = io.BytesIO()
-        Image.new('RGB', (200, 90), color.to_rgb()).save(file, format='PNG')
-        file.seek(0)
-        em.set_image(url="attachment://color.png")
-        await ctx.send(file=discord.File(file, 'color.png'), embed=em)
-
     """
     @commands.command()
     async def add(self, ctx, *numbers : int):
         '''Add multiple numbers together'''
         await ctx.send(f'Result: `{sum(numbers)}`')
     """
-
-    @commands.command(description='This command might get you banned')
-    async def annoy(self, ctx, *, member=None, times: int = None):
-        """Want to annoy a member with mentions?"""
-        channel = ctx.message.channel
-        author = ctx.message.author
-        message = ctx.message
-        usage = f'```Usage: {ctx.prefix}ultimate_annoying_spam_command [@member] [times]```'
-
-        if member or times is None:
-            await ctx.channel.send(usage)
-            return
-
-        if times > 100:
-            times = 35
-
-        if times is 0:
-            sorry = f'Someone, not saying who, *cough cough {author}* felt sorry about using this command.'
-            await ctx.channel.send(sorry)
-            return
-
-        if times < 0:
-            chicken = "Well, that's just not enough times to annoy anybody. Don't chicken out now!"
-            await ctx.channel.send(chicken)
-            return
-
-        await message.delete()
-
-        for i in range(0, times):
-            try:
-                await channel.send(f'{member.mention} LOL')
-            except Exception:
-                pass
-
-    @commands.command()
-    async def tinyurl(self, ctx, *, link: str):
-        await ctx.message.delete()
-        url = 'http://tinyurl.com/api-create.php?url=' + link
-        async with ctx.session.get(url) as resp:
-            new = await resp.text()
-        emb = discord.Embed(colour=await ctx.get_dominant_color(ctx.author.avatar_url))
-        emb.add_field(name="Original Link", value=link, inline=False)
-        emb.add_field(name="Shortened Link", value=new, inline=False)
-        await ctx.send(embed=emb)
-
 
     @commands.group(invoke_without_command=True, aliases=['calculate', 'calculator'])
     async def calc(self, ctx):
@@ -424,32 +335,6 @@ class Misc:
         else:
             emb.title = "Search term not found."
         await ctx.send(embed=emb)
-
-    @commands.group(invoke_without_command=True)
-    async def lenny(self, ctx):
-        """Lenny and tableflip group commands"""
-        msg = 'Available: `{}lenny face`, `{}lenny shrug`, `{}lenny tableflip`, `{}lenny unflip`'
-        await ctx.send(msg.format(ctx.prefix))
-
-    @lenny.command()
-    async def shrug(self, ctx):
-        """Shrugs!"""
-        await ctx.message.edit(content='¯\\\_(ツ)\_/¯')
-
-    @lenny.command()
-    async def tableflip(self, ctx):
-        """Tableflip!"""
-        await ctx.message.edit(content='(╯°□°）╯︵ ┻━┻')
-
-    @lenny.command()
-    async def unflip(self, ctx):
-        """Unfips!"""
-        await ctx.message.edit(content='┬─┬﻿ ノ( ゜-゜ノ)')
-
-    @lenny.command()
-    async def face(self, ctx):
-        """Lenny Face!"""
-        await ctx.message.edit(content='( ͡° ͜ʖ ͡°)')
 
     @commands.command(aliases=['8ball'])
     async def eightball(self, ctx, *, question=None):
