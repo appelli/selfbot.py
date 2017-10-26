@@ -18,8 +18,6 @@ import re
 import json
 from discord.ext import commands
 import discord
-from pyfiglet import figlet_format, FontError, FontNotFound
-import urllib.parse
 
 
 class New:
