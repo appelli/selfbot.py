@@ -95,7 +95,8 @@ class Information:
                     await ctx.send(file=discord.File(file, 'avatar.png'))
             except discord.HTTPException:
                 await ctx.send(av)
-
+	
+				
     @commands.command(aliases=['servericon'])
     async def serverlogo(self, ctx):
         '''Return the server's icon url.'''

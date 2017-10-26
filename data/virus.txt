@@ -1,4 +1,4 @@
-``[▓▓▓                    ] / {virus}-virus.exe Packing files.``
+﻿``[▓▓▓                    ] / {virus}-virus.exe Packing files.``
 ``[▓▓▓▓▓▓▓                ] - {virus}-virus.exe Packing files..``
 ``[▓▓▓▓▓▓▓▓▓▓▓▓           ] \ {virus}-virus.exe Packing files..``
 ``[▓▓▓▓▓▓▓▓▓▓▓▓▓▓         ] | {virus}-virus.exe Packing files..``
@@ -9,4 +9,5 @@
 ``Injecting virus.   |``
 ``Injecting virus..  /``
 ``Injecting virus... -``
+``Injecting virus... \``
 ``Successfully Injected {virus}-virus.exe into {user}``
