@@ -101,13 +101,13 @@ class Information:
             voice_state = None if not user.voice else user.voice.channel
             if embed_perms(ctx.message):
                 em = discord.Embed(timestamp=ctx.message.created_at, colour=0x708DD0)
-                em.add_field(name='User ID', value=user.id, inline=True)
-                em.add_field(name='Nick', value=user.nick, inline=True)
+                em.add_field(name='ID', value=user.id, inline=True)
+                em.add_field(name='Nickname', value=user.nick, inline=True)
                 em.add_field(name='Status', value=user.status, inline=True)
-                em.add_field(name='In Voice', value=voice_state, inline=True)
+                em.add_field(name='Voice Info', value=voice_state, inline=True)
                 em.add_field(name='Game', value=user.game, inline=True)
-                em.add_field(name='Highest Role', value=role, inline=True)
-                em.add_field(name='Account Created', value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
+                em.add_field(name='Top Role', value=role, inline=True)
+                em.add_field(name='Creation Date', value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
                 em.add_field(name='Join Date', value=user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
                 em.set_thumbnail(url=avi)
                 em.set_author(name=user, icon_url='https://i.imgur.com/RHagTDg.png')
@@ -218,16 +218,16 @@ class Information:
 
         rolenames = ', '.join([r.name for r in roles if r.name != "@everyone"]) or 'None'
         time = ctx.message.created_at
-        desc = '{0} is chilling in {1} mode.'.format(user.name, user.status)
+        desc = '{0} is in {1} mode.'.format(user.name, user.status)
         member_number = sorted(server.members, key=lambda m: m.joined_at).index(user) + 1
 
         em = discord.Embed(colour=color, description=desc, timestamp=time)
         em.add_field(name='Nick', value=user.nick, inline=True)
         em.add_field(name='Member No.',value=str(member_number),inline = True)
-        em.add_field(name='Account Created', value=user.created_at.__format__('%A, %d. %B %Y'))
+        em.add_field(name='Creation Date', value=user.created_at.__format__('%A, %d. %B %Y'))
         em.add_field(name='Join Date', value=user.joined_at.__format__('%A, %d. %B %Y'))
         em.add_field(name='Roles', value=rolenames, inline=True)
-        em.set_footer(text='User ID: '+str(user.id))
+        em.set_footer(text='ID: '+str(user.id))
         em.set_thumbnail(url=avi)
         em.set_author(name=user, icon_url=server.icon_url)
 
@@ -280,7 +280,7 @@ class Information:
 
         embed.add_field(name='Author', value='verixx#7220')
         embed.add_field(name='Uptime', value=uptime)
-        embed.add_field(name='Guilds', value=len(self.bot.guilds))
+        embed.add_field(name='Servers', value=len(self.bot.guilds))
         embed.add_field(name='Members', value=f'{total_unique} total\n{total_online} online')
         embed.add_field(name='Channels', value=f'{text} text\n{voice} voice\n{dm} direct')
         memory_usage = self.bot.process.memory_full_info().uss / 1024**2
