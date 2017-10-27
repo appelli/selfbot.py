@@ -22,8 +22,10 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import TextChannelConverter
 from contextlib import redirect_stdout
+from ext import embedtobox
 from ext.utility import load_json
 from urllib.parse import quote as uriquote
+from urllib.parse import urlparse
 from mtranslate import translate
 from lxml import etree
 from ext import fuzzy
@@ -34,11 +36,16 @@ import traceback
 import textwrap
 import wikipedia
 import aiohttp
+import datetime
 import inspect
+import random
 import re
 import io
 import os
+import asyncio
+import psutil
 import random
+import pip
 
 class Utility:
     '''Useful commands to make your life easier'''
