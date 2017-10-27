@@ -18,20 +18,6 @@ import os
 class New:
     def __init__(self, bot):
         self.bot = bot
-
-	@commands.command(pass_context=True, aliases=['pick']
-	async def cmd_changegame(message, parameters, recursion=0):
-	    """Choose randomly from the options you give. choose this | that"""
-    if message.server:
-        me = message.server.me
-    else:
-        me = list(client.servers)[0].me
-    if parameters == '':
-        game = None
-    else:
-        game = discord.Game(name=parameters)
-    await client.change_presence(game=game, status=me.status)
-    await reply(message, ":thumbsup:")
 		
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
