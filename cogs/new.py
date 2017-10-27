@@ -80,7 +80,7 @@ class New:
         await ctx.send(regional_output)
 		
     @commands.command()
-    async def embedsay(self, ctx, *, discord.TextChannel=None):
+    async def embedsay(self, ctx, *, msg, channel : discord.TextChannel=None):
         '''Quick command to embed messages quickly.'''
         await ctx.message.delete()
         em = discord.Embed(colour=msg.author.top_role.color)
