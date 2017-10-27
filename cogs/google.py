@@ -13,6 +13,7 @@ import io
 import aiohttp
 import json
 import os
+import urllib.parse
 
 '''Module for google web and image search.'''
 
