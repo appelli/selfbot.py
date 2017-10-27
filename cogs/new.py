@@ -13,7 +13,25 @@ import io
 import aiohttp
 import json
 import os
-
+from discord.ext.commands import TextChannelConverter
+from contextlib import redirect_stdout
+from ext import embedtobox
+from ext.utility import load_json
+from urllib.parse import quote as uriquote
+from urllib.parse import urlparse
+from mtranslate import translate
+from lxml import etree
+from ext import fuzzy
+from ext import embedtobox
+import unicodedata
+import traceback
+import textwrap
+import wikipedia
+import datetime
+import inspect
+import re
+import psutil
+import pip
 
 class New:
     def __init__(self, bot):
@@ -62,7 +80,7 @@ class New:
         await ctx.send(regional_output)
 		
     @commands.command()
-    async def embedsay(self, ctx, *, message, id : int, channel : discord.TextChannel=None):
+    async def embedsay(self, ctx, *, discord.TextChannel=None):
         '''Quick command to embed messages quickly.'''
         await ctx.message.delete()
         em = discord.Embed(colour=msg.author.top_role.color)
