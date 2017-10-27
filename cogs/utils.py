@@ -160,7 +160,7 @@ class Utility:
         if not msg:
             return await ctx.send('Could not find that message!', delete_after=3.0)
 
-        em = discord.Embed(color=0x51b9d8, description=msg.clean_content, timestamp=msg.created_at)
+        em = discord.Embed(color=top_role.color, description=msg.clean_content, timestamp=msg.created_at)
         em.set_author(name=str(msg.author), icon_url=msg.author.avatar_url)
 
         if isinstance(msg.channel, discord.TextChannel):
