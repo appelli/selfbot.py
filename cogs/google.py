@@ -7,8 +7,6 @@ import io
 import aiohttp
 import json
 import os
-from cogs.utils.checks import load_optional_config, embed_perms, get_google_entries
-from cogs.utils.config import get_config_value
 
 '''Module for google web and image search.'''
 
