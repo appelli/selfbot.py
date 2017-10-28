@@ -1,6 +1,6 @@
 '''
 MIT License
-Copyright (c) 2017 verixx
+Copyright (c) 2017 Grok
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -22,10 +22,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import TextChannelConverter
 from contextlib import redirect_stdout
-from ext import embedtobox
 from ext.utility import load_json
 from urllib.parse import quote as uriquote
-from urllib.parse import urlparse
 from mtranslate import translate
 from lxml import etree
 from ext import fuzzy
@@ -36,16 +34,27 @@ import traceback
 import textwrap
 import wikipedia
 import aiohttp
-import datetime
 import inspect
-import random
+import asyncio
+import crasync
+import cr_py
+import time
 import re
 import io
 import os
-import asyncio
-import psutil
 import random
-import pip
+
+#Feel free to add to these via a PR
+emotes_servers = [
+    368436386157690880,
+    356823991215980544,
+    310157548244434947,
+    361611981024919552,
+    355117358743945216,
+    285670702294630401,
+    227543998590353408,
+    358365432564154369
+]
 
 class Utility:
     '''Useful commands to make your life easier'''
@@ -128,6 +137,48 @@ class Utility:
                 for page in em_list:
                     await ctx.send(page)
 
+    @commands.command(name='presence')
+    async def _presence(self, ctx, status, *, message=None):
+        '''Change your Discord status! (Stream, Online, Idle, DND, Invisible, or clear it)'''
+        status = status.lower()
+        emb = discord.Embed(title="Presence")
+        emb.color = await ctx.get_dominant_color(ctx.author.avatar_url)
+        file = io.BytesIO()
+        if status == "online":
+            await self.bot.change_presence(status=discord.Status.online, game=discord.Game(name=message), afk=True)
+            color = discord.Color(value=0x43b581).to_rgb()
+        elif status == "idle":
+            await self.bot.change_presence(status=discord.Status.idle, game=discord.Game(name=message), afk=True)
+            color = discord.Color(value=0xfaa61a).to_rgb()
+        elif status == "dnd":
+            await self.bot.change_presence(status=discord.Status.dnd, game=discord.Game(name=message), afk=True)
+            color = discord.Color(value=0xf04747).to_rgb()
+        elif status == "invis" or status == "invisible":
+            await self.bot.change_presence(status=discord.Status.invisible, game=discord.Game(name=message), afk=True)
+            color = discord.Color(value=0x747f8d).to_rgb()
+        elif status == "stream":
+            await self.bot.change_presence(status=discord.Status.online, game=discord.Game(name=message,type=1,url=f'https://www.twitch.tv/{message}'), afk=True)
+            color = discord.Color(value=0x593695).to_rgb()
+        elif status == "clear":
+            await self.bot.change_presence(game=None, afk=True)
+            emb.description = "Presence cleared."
+            return await ctx.send(embed=emb)
+        else:
+            emb.description = "Please enter either `online`, `idle`, `dnd`, `invisible`, or `clear`."
+            return await ctx.send(embed=emb)
+
+        Image.new('RGB', (500, 500), color).save(file, format='PNG')
+        emb.description = "Your presence has been changed."
+        file.seek(0)
+        emb.set_author(name=status.title(), icon_url="attachment://color.png")
+        try:
+            await ctx.send(file=discord.File(file, 'color.png'), embed=emb)
+        except discord.HTTPException:
+            em_list = await embedtobox.etb(emb)
+            for page in em_list:
+                await ctx.send(page)
+
+
     @commands.command()
     async def source(self, ctx, *, command):
         '''See the source code for any command.'''
@@ -167,7 +218,7 @@ class Utility:
         if not msg:
             return await ctx.send('Could not find that message!', delete_after=3.0)
 
-        em = discord.Embed(color=msg.author.top_role.color, description=msg.clean_content, timestamp=msg.created_at)
+        em = discord.Embed(color=0x00FFFF, description=msg.clean_content, timestamp=msg.created_at)
         em.set_author(name=str(msg.author), icon_url=msg.author.avatar_url)
 
         if isinstance(msg.channel, discord.TextChannel):
@@ -413,7 +464,7 @@ class Utility:
 
         if obj is None:
             await ctx.send(base_url)
-            return	
+            return
 
         if not self._rtfm_cache:
             await ctx.trigger_typing()
@@ -741,6 +792,168 @@ class Utility:
                     entries.append((link.get('href'), link.text))
 
         return card, entries
-		
+
+    @commands.command(aliases=['g'])
+    async def google(self, ctx, *, query):
+        """Searches google and gives you top result."""
+        await ctx.trigger_typing()
+        try:
+            card, entries = await self.get_google_entries(query)
+        except RuntimeError as e:
+            await ctx.send(str(e))
+        else:
+            if card:
+                value = '\n'.join(f'[{title}]({url.replace(")", "%29")})' for url, title in entries[:3])
+                if value:
+                    card.add_field(name='Search Results', value=value, inline=False)
+                return await ctx.send(embed=card)
+
+            if len(entries) == 0:
+                return await ctx.send('No results found... sorry.')
+
+            next_two = [x[0] for x in entries[1:3]]
+            first_entry = entries[0][0]
+            if first_entry[-1] == ')':
+                first_entry = first_entry[:-1] + '%29'
+
+            if next_two:
+                formatted = '\n'.join(f'<{x}>' for x in next_two)
+                msg = f'{first_entry}\n\n**See also:**\n{formatted}'
+            else:
+                msg = first_entry
+
+            await ctx.send(msg)
+
+    @commands.command(pass_context=True, hidden=True, name='eval')
+    async def _eval(self, ctx, *, body: str):
+        """Evaluates python code"""
+
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message,
+            '_': self._last_result,
+            'source': inspect.getsource
+        }
+
+        env.update(globals())
+
+        body = self.cleanup_code(body)
+        await self.edit_to_codeblock(ctx, body)
+        stdout = io.StringIO()
+        err = out = None
+
+        to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+
+        try:
+            exec(to_compile, env)
+        except Exception as e:
+            err = await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+            return await err.add_reaction('\u2049')
+
+        func = env['func']
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
+        except Exception as e:
+            value = stdout.getvalue()
+            err = await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+        else:
+            value = stdout.getvalue()
+            if self.bot.token in value:
+                value = value.replace(self.bot.token,"[EXPUNGED]")
+            if ret is None:
+                if value:
+                    try:
+                        out = await ctx.send(f'```py\n{value}\n```')
+                    except:
+                        paginated_text = ctx.paginate(value)
+                        for page in paginated_text:
+                            if page == paginated_text[-1]:
+                                out = await ctx.send(f'```py\n{page}\n```')
+                                break
+                            await ctx.send(f'```py\n{page}\n```')
+            else:
+                self._last_result = ret
+                try:
+                    out = await ctx.send(f'```py\n{value}{ret}\n```')
+                except:
+                    paginated_text = ctx.paginate(f"{value}{ret}")
+                    for page in paginated_text:
+                        if page == paginated_text[-1]:
+                            out = await ctx.send(f'```py\n{page}\n```')
+                            break
+                        await ctx.send(f'```py\n{page}\n```')
+
+        if out:
+            await out.add_reaction('\u2705')
+        if err:
+            await err.add_reaction('\u2049')
+
+
+    async def edit_to_codeblock(self, ctx, body):
+        msg = f'{ctx.prefix}eval\n```py\n{body}\n```'
+        await ctx.message.edit(content=msg)
+
+
+    def cleanup_code(self, content):
+        """Automatically removes code blocks from the code."""
+        # remove ```py\n```
+        if content.startswith('```') and content.endswith('```'):
+            return '\n'.join(content.split('\n')[1:-1])
+
+        # remove `foo`
+        return content.strip('` \n')
+
+    def get_syntax_error(self, e):
+        if e.text is None:
+            return f'```py\n{e.__class__.__name__}: {e}\n```'
+        return f'```py\n{e.text}{"^":>{e.offset}}\n{e.__class__.__name__}: {e}```'
+
+    @commands.command()
+    async def hastebin(self, ctx, code):
+        '''Hastebin-ify your code!'''
+        async with ctx.session.post("https://hastebin.com/documents", data=code) as resp:
+            data = await resp.json()
+        await ctx.message.edit(content=f"Hastebin-inified! <https://hastebin.com/{data['key']}.py>")
+
+    @commands.command()
+    async def clear(self, ctx, *, serverid = None):
+        '''Marks messages from selected servers or emote servers as read'''
+        if serverid != None:
+            if serverid == 'all':
+                for guild in self.bot.guilds:
+                    await guild.ack()
+                await ctx.send('Cleared all unread messages')
+                return
+            try:
+                serverid = int(serverid)
+            except:
+                await ctx.send('Invalid Server ID')
+                return
+            server = discord.utils.get(self.bot.guilds, id=int(serverid))
+            if server == None:
+                await ctx.send('Invalid Server ID')
+                return
+            await server.ack()
+            await ctx.send(f'All messages marked read in {server.name}!')
+            return
+        for guild in self.bot.guilds:
+            if guild.id in emotes_servers:
+                await guild.ack()
+        await ctx.send('All messages marked read in emote servers!')
+
+    @commands.command()
+    async def choose(self, ctx, *, choices: commands.clean_content):
+        '''Choose between multiple choices. Use `,` to seperate choices.'''
+        choices = choices.split(',')
+        if len(choices) < 2:
+            return await ctx.send('Not enough choices to pick from.')
+        choices[0] = ' ' + choices[0]
+        await ctx.send(str(random.choice(choices))[1:])
+
 def setup(bot):
     bot.add_cog(Utility(bot))
