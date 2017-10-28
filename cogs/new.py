@@ -36,12 +36,6 @@ import pip
 class New:
     def __init__(self, bot):
         self.bot = bot
-			
-    @commands.command(pass_context=True, aliases=['pick'])
-    async def choose(self, ctx, *, choices: str):
-        """Choose randomly from the options you give. [p]choose this | that"""
-        await ctx.send(
-                       self.bot.bot_prefix + 'I choose: ``{}``'.format(random.choice(choices.split("|"))))
 		
     @commands.group(pass_context=True, invoke_without_command=True)
     async def ascii(self, ctx, *, msg):
