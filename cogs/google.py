@@ -147,6 +147,7 @@ class Google:
         return e
 
     @commands.command(pass_context=True)
+    async def google2(self, ctx, *, query):
         """Google web search. Ex: [p]g what is discordapp?"""
         if not embed_perms(ctx.message):
             config = load_optional_config()
@@ -178,6 +179,7 @@ class Google:
             await ctx.send(msg)
 
     @commands.command(pass_context=True, aliases=['image', 'img'])
+    async def googleimage(self, ctx, *, query):
         """Google image search. [p]i Lillie pokemon sun and moon"""
         await ctx.message.delete()
         config = load_optional_config()
