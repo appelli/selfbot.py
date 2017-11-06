@@ -1,4 +1,5 @@
 {
     "PREFIX": "r.",
-    "TOKEN": "your_token_here"
+    "TOKEN": "your_token_here",
+    "OWNER": "owner id here"
 }
